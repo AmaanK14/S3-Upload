@@ -9,10 +9,6 @@ app.use(cors());
 app.use(express.json());
 
 const s3 = new S3Client({
-    credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY,
-        secretAccessKey: process.env.AWS_SECRET_KEY
-    },
     region: process.env.AWS_REGION
 });
 
@@ -35,9 +31,9 @@ app.post('/api/get-presigned-url', async (req, res) => {
 
     try {
         const command = new PutObjectCommand(params);
-        const presignedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+        const presignedUrl = await getSignedUrl(s3, command);
         const getCommand = new GetObjectCommand(params);
-        const viewUrl = await getSignedUrl(s3, getCommand, { expiresIn: 3600 });
+        const viewUrl = await getSignedUrl(s3, getCommand);
         res.json({
             presignedUrl,
             viewUrl,
@@ -48,6 +44,10 @@ app.post('/api/get-presigned-url', async (req, res) => {
         res.status(500).json({ error: 'Failed to generate presigned URL' });
     }
 });
+
+app.get("/",(req,res)=>{
+    res.send("Hello World")
+})
 
 const PORT = 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
